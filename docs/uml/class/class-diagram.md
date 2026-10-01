@@ -1,0 +1,163 @@
+# Class Diagram
+
+## Mermaid Class Diagram
+
+```mermaid
+classDiagram
+    class User {
+        +String userId
+        +String name
+        +String email
+        +String password
+        +String role
+        +String phone
+        +login(): boolean
+        +logout(): void
+        +updateProfile(): void
+    }
+
+    class Student {
+        +String rollNumber
+        +String department
+        +String hostel
+    }
+
+    class Faculty {
+        +String employeeId
+        +String department
+        +String officeRoom
+    }
+
+    class MaintenanceStaff {
+        +String staffId
+        +String specialization
+        +boolean isAvailable
+        +viewAssignments(): List~ComplaintAssignment~
+        +updateStatus(complaintId, status): void
+    }
+
+    class Administrator {
+        +String adminId
+        +verifyComplaint(complaintId): void
+        +assignStaff(complaintId, staffId): void
+        +generateReport(): Report
+        +manageUsers(): void
+    }
+
+    class Complaint {
+        +String complaintId
+        +String description
+        +Date dateSubmitted
+        +String status
+        +String mediaUrl
+        +submit(): void
+        +updateStatus(): void
+        +getDetails(): Complaint
+    }
+
+    class ComplaintCategory {
+        +String categoryId
+        +String categoryName
+        +String description
+        +getCategoryInfo(): String
+    }
+
+    class Location {
+        +String locationId
+        +String buildingName
+        +String roomNumber
+        +getLocationDetails(): String
+    }
+
+    class ComplaintAssignment {
+        +String assignmentId
+        +Date assignedDate
+        +Date expectedCompletion
+        +createAssignment(): void
+        +completeAssignment(): void
+    }
+
+    class ComplaintUpdate {
+        +String updateId
+        +Date updateTime
+        +String remarks
+        +String previousStatus
+        +String newStatus
+        +addUpdate(): void
+    }
+
+    class Feedback {
+        +String feedbackId
+        +int rating
+        +String comments
+        +Date feedbackDate
+        +submitFeedback(): void
+    }
+
+    class Notification {
+        +String notificationId
+        +String message
+        +Date timestamp
+        +boolean isRead
+        +send(): void
+        +markAsRead(): void
+    }
+
+    class Dashboard {
+        +int totalComplaints
+        +int pendingComplaints
+        +int resolvedComplaints
+        +loadStatistics(): void
+        +refresh(): void
+    }
+
+    class Report {
+        +String reportId
+        +Date generatedDate
+        +String reportType
+        +String data
+        +exportPDF(): void
+        +exportCSV(): void
+    }
+
+    %% Inheritance
+    User <|-- Student
+    User <|-- Faculty
+    User <|-- MaintenanceStaff
+    User <|-- Administrator
+
+    %% Associations
+    Student "1" -- "*" Complaint : submits
+    Faculty "1" -- "*" Complaint : submits
+    Administrator "1" -- "*" Complaint : verifies/closes
+    Administrator "1" -- "*" Report : generates
+
+    Complaint "*" -- "1" ComplaintCategory : categorized as
+    Complaint "*" -- "1" Location : located at
+    
+    Complaint "1" *-- "*" ComplaintUpdate : tracks progress
+    Complaint "1" -- "0..1" Feedback : receives
+    
+    Complaint "1" -- "0..1" ComplaintAssignment : assigned via
+    ComplaintAssignment "0..*" -- "1" MaintenanceStaff : handled by
+    
+    User "1" -- "*" Notification : receives
+    User "1" -- "1" Dashboard : views
+```
+
+## Detailed Explanation of Classes
+
+1. **User (Abstract/Base Class)**: Represents the base entity for all actors in the system. Contains common attributes like name, email, and authentication methods.
+2. **Student**: Inherits from User. Represents a student submitting complaints, contains specific fields like roll number.
+3. **Faculty**: Inherits from User. Represents teaching staff, contains employee ID and office details.
+4. **MaintenanceStaff**: Inherits from User. Represents the workers who resolve complaints. Has a specialization (e.g., plumbing, electrical).
+5. **Administrator**: Inherits from User. Handles system oversight, complaint verification, assignment, and report generation.
+6. **Complaint**: The core business entity. Contains all details regarding an issue raised by a Student/Faculty.
+7. **ComplaintCategory**: Defines the classification of the complaint (e.g., Electrical, IT, Civil) for better routing.
+8. **Location**: Specifies where the issue is occurring (building, room).
+9. **ComplaintAssignment**: An associative entity representing the allocation of a specific complaint to a specific maintenance staff member.
+10. **ComplaintUpdate**: Records the history and progression of a complaint's status over time.
+11. **Feedback**: Stores user ratings and comments after a complaint is resolved and closed.
+12. **Notification**: System alerts sent to users regarding status changes or new assignments.
+13. **Dashboard**: Represents the UI aggregation of data showing statistics for a specific user role.
+14. **Report**: An entity representing aggregated data exports generated by the Administrator.
