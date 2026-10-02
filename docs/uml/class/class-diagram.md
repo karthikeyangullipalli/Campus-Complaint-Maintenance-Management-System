@@ -5,12 +5,14 @@
 ```mermaid
 classDiagram
     class User {
-        +String userId
+        +Int id
         +String name
         +String email
-        +String password
+        +String password_hash
         +String role
+        +String department
         +String phone
+        +Boolean is_active
         +login(): boolean
         +logout(): void
         +updateProfile(): void
@@ -45,44 +47,61 @@ classDiagram
     }
 
     class Complaint {
-        +String complaintId
+        +Int id
+        +String complaint_number
+        +Int user_id
+        +Int category_id
+        +Int location_id
+        +String title
         +String description
-        +Date dateSubmitted
+        +String priority
         +String status
-        +String mediaUrl
+        +String image_path
+        +Timestamp created_at
+        +Timestamp updated_at
+        +Timestamp resolved_at
+        +Timestamp closed_at
         +submit(): void
-        +updateStatus(): void
+        +updateStatus(newStatus): void
         +getDetails(): Complaint
     }
 
     class ComplaintCategory {
-        +String categoryId
-        +String categoryName
+        +Int id
+        +String name
         +String description
+        +Boolean is_active
         +getCategoryInfo(): String
     }
 
     class Location {
-        +String locationId
-        +String buildingName
-        +String roomNumber
-        +getLocationDetails(): String
+        +Int id
+        +String building
+        +String floor
+        +String room
+        +String description
+        +Boolean is_active
+        +getDisplayName(): String
     }
 
     class ComplaintAssignment {
-        +String assignmentId
-        +Date assignedDate
-        +Date expectedCompletion
+        +Int id
+        +Int complaint_id
+        +Int maintenance_staff_id
+        +Int assigned_by
+        +Timestamp assigned_at
+        +String notes
         +createAssignment(): void
-        +completeAssignment(): void
     }
 
     class ComplaintUpdate {
-        +String updateId
-        +Date updateTime
+        +Int id
+        +Int complaint_id
+        +Int updated_by
+        +String old_status
+        +String new_status
         +String remarks
-        +String previousStatus
-        +String newStatus
+        +Timestamp created_at
         +addUpdate(): void
     }
 

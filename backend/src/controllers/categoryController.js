@@ -1,8 +1,12 @@
 const db = require('../config/database');
 
+// Table name: complaint_categories (NOT 'categories')
+
 exports.getCategories = async (req, res, next) => {
   try {
-    const [categories] = await db.execute('SELECT * FROM categories ORDER BY name ASC');
+    const [categories] = await db.execute(
+      'SELECT * FROM complaint_categories WHERE is_active = TRUE ORDER BY name ASC'
+    );
     res.status(200).json({ success: true, count: categories.length, data: categories });
   } catch (err) {
     next(err);
@@ -12,7 +16,13 @@ exports.getCategories = async (req, res, next) => {
 exports.createCategory = async (req, res, next) => {
   try {
     const { name, description } = req.body;
-    const [result] = await db.execute('INSERT INTO categories (name, description) VALUES (?, ?)', [name, description]);
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Category name is required' });
+    }
+    const [result] = await db.execute(
+      'INSERT INTO complaint_categories (name, description) VALUES (?, ?)',
+      [name, description || null]
+    );
     res.status(201).json({ success: true, message: 'Category created', id: result.insertId });
   } catch (err) {
     next(err);
@@ -21,9 +31,11 @@ exports.createCategory = async (req, res, next) => {
 
 exports.updateCategory = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
-    const [result] = await db.execute('UPDATE categories SET name = ?, description = ? WHERE id = ?', [name, description, req.params.id]);
-    
+    const { name, description, is_active } = req.body;
+    const [result] = await db.execute(
+      'UPDATE complaint_categories SET name = ?, description = ?, is_active = ? WHERE id = ?',
+      [name, description || null, is_active !== undefined ? is_active : true, req.params.id]
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
@@ -35,12 +47,15 @@ exports.updateCategory = async (req, res, next) => {
 
 exports.deleteCategory = async (req, res, next) => {
   try {
-    const [result] = await db.execute('DELETE FROM categories WHERE id = ?', [req.params.id]);
-    
+    // Soft delete — set is_active = FALSE
+    const [result] = await db.execute(
+      'UPDATE complaint_categories SET is_active = FALSE WHERE id = ?',
+      [req.params.id]
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
-    res.status(200).json({ success: true, message: 'Category deleted' });
+    res.status(200).json({ success: true, message: 'Category deactivated' });
   } catch (err) {
     next(err);
   }

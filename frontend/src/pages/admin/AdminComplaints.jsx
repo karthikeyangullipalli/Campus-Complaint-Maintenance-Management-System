@@ -1,11 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../utils/api';
-import StatusBadge from '../../components/common/StatusBadge';
-import PriorityBadge from '../../components/common/PriorityBadge';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { formatDate } from '../../utils/helpers';
-import { FiSearch, FiFilter } from 'react-icons/fi';
+import axios from 'axios';
 
 const AdminComplaints = () => {
   const [complaints, setComplaints] = useState([]);
@@ -15,96 +10,95 @@ const AdminComplaints = () => {
 
   useEffect(() => {
     fetchComplaints();
-  }, [statusFilter]);
+  }, []);
 
   const fetchComplaints = async () => {
-    setLoading(true);
     try {
-      const res = await api.get(`/complaints${statusFilter ? `?status=${statusFilter}` : ''}`);
-      setComplaints(res.data.complaints || []);
+      const res = await axios.get('/api/complaints');
+      setComplaints(res.data.data || []);
     } catch (error) {
-      console.error("Error fetching complaints", error);
+      console.error('Error fetching complaints:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredComplaints = complaints.filter(c => 
-    c.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.id.toString().includes(searchTerm)
-  );
+  const filteredComplaints = complaints.filter(c => {
+    const matchesSearch = c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          c.complaint_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          c.user_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === '' || c.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manage Complaints</h1>
+    <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Manage Complaints</h1>
+
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <input 
+          type="text" 
+          placeholder="Search by title, number, or user..." 
+          className="w-full md:w-1/2 p-2 border rounded"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select 
+          className="w-full md:w-1/4 p-2 border rounded bg-white"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Statuses</option>
+          <option value="PENDING">PENDING</option>
+          <option value="VERIFIED">VERIFIED</option>
+          <option value="ASSIGNED">ASSIGNED</option>
+          <option value="IN_PROGRESS">IN_PROGRESS</option>
+          <option value="RESOLVED">RESOLVED</option>
+          <option value="CLOSED">CLOSED</option>
+          <option value="REJECTED">REJECTED</option>
+          <option value="REOPENED">REOPENED</option>
+        </select>
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg border border-gray-100 mb-6 p-4 flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="relative flex-1 max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FiSearch className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 border"
-            placeholder="Search by title or ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center space-x-2">
-          <FiFilter className="text-gray-400" />
-          <select 
-            className="border-gray-300 rounded-md text-sm py-2 pl-3 pr-10 focus:ring-primary focus:border-primary border"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            <option value="NEW">New</option>
-            <option value="VERIFIED">Verified</option>
-            <option value="ASSIGNED">Assigned</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="RESOLVED">Resolved</option>
-            <option value="CLOSED">Closed</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-        </div>
-      </div>
-
-      {loading ? <LoadingSpinner /> : (
-        <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="bg-white rounded shadow overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b">
+                <th className="p-4 font-semibold text-sm text-gray-600">Complaint #</th>
+                <th className="p-4 font-semibold text-sm text-gray-600">Title</th>
+                <th className="p-4 font-semibold text-sm text-gray-600">User</th>
+                <th className="p-4 font-semibold text-sm text-gray-600">Category</th>
+                <th className="p-4 font-semibold text-sm text-gray-600">Status</th>
+                <th className="p-4 font-semibold text-sm text-gray-600">Date</th>
+                <th className="p-4 font-semibold text-sm text-gray-600">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredComplaints.map(complaint => (
+                <tr key={complaint.id} className="border-b hover:bg-gray-50">
+                  <td className="p-4 text-sm font-medium text-gray-900">{complaint.complaint_number}</td>
+                  <td className="p-4 text-sm text-gray-700">{complaint.title}</td>
+                  <td className="p-4 text-sm text-gray-700">{complaint.user_name}</td>
+                  <td className="p-4 text-sm text-gray-700">{complaint.category_name}</td>
+                  <td className="p-4 text-sm text-gray-700">
+                    <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                      {complaint.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-sm text-gray-700">{new Date(complaint.created_at).toLocaleDateString()}</td>
+                  <td className="p-4 text-sm text-blue-600 hover:underline">
+                    <Link to={`/admin/complaints/${complaint.id}`}>Manage</Link>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredComplaints.map(complaint => (
-                  <tr key={complaint.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{complaint.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{complaint.title}</div>
-                      <div className="text-sm text-gray-500">{complaint.user?.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap"><PriorityBadge priority={complaint.priority} /></td>
-                    <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={complaint.status} /></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(complaint.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link to={`/admin/complaints/${complaint.id}`} className="text-primary hover:text-blue-900">Manage</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
+          {filteredComplaints.length === 0 && (
+            <div className="p-4 text-center text-gray-500">No complaints found.</div>
+          )}
         </div>
       )}
     </div>

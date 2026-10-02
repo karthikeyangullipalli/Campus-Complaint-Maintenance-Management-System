@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../utils/api';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -12,68 +11,72 @@ const UsersPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get('/users');
-      setUsers(res.data);
+      const res = await axios.get('/api/users');
+      setUsers(res.data.data || []);
     } catch (error) {
-      console.error("Error fetching users", error);
+      console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeactivate = async (id, isActive) => {
+  const handleDeactivate = async (id) => {
+    if(!window.confirm('Deactivate this user?')) return;
     try {
-      await api.patch(`/users/${id}/status`, { isActive: !isActive });
+      await axios.put(`/api/users/${id}`, { is_active: false });
       fetchUsers();
     } catch (error) {
-      console.error("Error updating user status", error);
+      console.error('Error deactivating user:', error);
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Manage Users</h1>
-      <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.department || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {user.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleDeactivate(user.id, user.isActive)}
-                      className={`text-${user.isActive ? 'red' : 'green'}-600 hover:text-${user.isActive ? 'red' : 'green'}-900`}
+    <div className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Manage Users</h1>
+      
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b">
+              <th className="p-4 font-semibold text-sm text-gray-600">Name</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Email</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Role</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Department</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Status</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.id} className="border-b hover:bg-gray-50">
+                <td className="p-4 text-sm font-medium text-gray-900">{user.name}</td>
+                <td className="p-4 text-sm text-gray-700">{user.email}</td>
+                <td className="p-4 text-sm text-gray-700">{user.role}</td>
+                <td className="p-4 text-sm text-gray-700">{user.department || '-'}</td>
+                <td className="p-4 text-sm text-gray-700">
+                  <span className={`px-2 py-1 text-xs rounded-full ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {user.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td className="p-4 text-sm">
+                  {user.is_active && (
+                    <button 
+                      onClick={() => handleDeactivate(user.id)}
+                      className="text-red-600 hover:underline"
                     >
-                      {user.isActive ? 'Deactivate' : 'Activate'}
+                      Deactivate
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {users.length === 0 && (
+          <div className="p-4 text-center text-gray-500">No users found.</div>
+        )}
       </div>
     </div>
   );

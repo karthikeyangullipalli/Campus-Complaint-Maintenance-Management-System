@@ -1,81 +1,70 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
-import api from '../../utils/api';
-import StatsCard from '../../components/common/StatsCard';
-import StatusBadge from '../../components/common/StatusBadge';
-import PriorityBadge from '../../components/common/PriorityBadge';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { formatDate } from '../../utils/helpers';
-import { FiTool, FiCheckCircle, FiClock, FiList } from 'react-icons/fi';
 
 const MaintenanceDashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [tasks, setTasks] = useState([]);
+  const [data, setData] = useState({ byStatus: [], tasks: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const [statsRes, tasksRes] = await Promise.all([
-          api.get('/dashboard/maintenance'),
-          api.get('/complaints/assigned')
-        ]);
-        setStats(statsRes.data);
-        setTasks(tasksRes.data.complaints || []);
-      } catch (error) {
-        console.error("Error fetching maintenance dashboard", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboard();
   }, []);
 
-  if (loading) return <LoadingSpinner />;
+  const fetchDashboard = async () => {
+    try {
+      const res = await axios.get('/api/maintenance/dashboard');
+      setData(res.data.data || { byStatus: [], tasks: [] });
+    } catch (error) {
+      console.error('Error fetching maintenance dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Maintenance Dashboard</h1>
+    <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Maintenance Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatsCard title="Assigned Tasks" value={stats?.totalAssigned || 0} icon={FiList} colorClass="text-purple-600 bg-purple-100" />
-        <StatsCard title="In Progress" value={stats?.inProgress || 0} icon={FiTool} colorClass="text-yellow-600 bg-yellow-100" />
-        <StatsCard title="Resolved" value={stats?.resolved || 0} icon={FiCheckCircle} colorClass="text-green-600 bg-green-100" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {data.byStatus.map(stat => (
+          <div key={stat.status} className="bg-white p-6 rounded-lg shadow border-t-4 border-blue-500">
+            <h3 className="text-gray-500 text-sm font-semibold uppercase">{stat.status}</h3>
+            <p className="text-3xl font-bold text-gray-800 mt-2">{stat.count}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-lg font-medium text-gray-900">Current Tasks</h2>
-          <Link to="/maintenance/tasks" className="text-sm text-primary hover:underline">View all</Link>
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Recent Tasks</h2>
+          <Link to="/maintenance/tasks" className="text-blue-600 hover:underline text-sm">View All</Link>
         </div>
+        
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b bg-gray-50">
+                <th className="p-3 text-sm font-semibold text-gray-600">Complaint #</th>
+                <th className="p-3 text-sm font-semibold text-gray-600">Title</th>
+                <th className="p-3 text-sm font-semibold text-gray-600">Status</th>
+                <th className="p-3 text-sm font-semibold text-gray-600">Date Assigned</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {tasks.slice(0, 5).map(task => (
-                <tr key={task.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{task.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link to={`/maintenance/tasks/${task.id}`} className="text-sm font-medium text-primary hover:underline">
-                      {task.title}
-                    </Link>
-                    <div className="text-xs text-gray-500">{task.location?.name}</div>
+            <tbody>
+              {data.tasks.map(task => (
+                <tr key={task.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3 text-sm font-medium">{task.complaint_number}</td>
+                  <td className="p-3 text-sm"><Link to={`/maintenance/tasks/${task.id}`} className="text-blue-600 hover:underline">{task.title}</Link></td>
+                  <td className="p-3 text-sm">
+                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">{task.status}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap"><PriorityBadge priority={task.priority} /></td>
-                  <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={task.status} /></td>
+                  <td className="p-3 text-sm">{new Date(task.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
-              {tasks.length === 0 && (
-                <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">No tasks assigned.</td>
-                </tr>
+              {data.tasks.length === 0 && (
+                <tr><td colSpan="4" className="p-4 text-center text-gray-500">No recent tasks.</td></tr>
               )}
             </tbody>
           </table>

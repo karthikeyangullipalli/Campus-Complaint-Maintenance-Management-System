@@ -27,55 +27,124 @@ A Class Diagram is a static structure diagram that describes the structure of a 
 ```mermaid
 classDiagram
     class User {
-        +int userId
+        +int id
         +String name
         +String email
+        +String password_hash
         +String role
-        +login()
-        +logout()
+        +String department
+        +String phone
+        +Boolean is_active
+        +login() boolean
+        +logout() void
     }
     class Student {
-        +String hostelRoom
-        +submitComplaint()
-        +trackStatus()
+        +submitComplaint() void
+        +trackStatus() void
+        +provideFeedback() void
     }
-    class Admin {
-        +assignTask()
-        +generateReport()
+    class Faculty {
+        +submitComplaint() void
+        +trackStatus() void
+    }
+    class Administrator {
+        +verifyComplaint() void
+        +assignStaff() void
+        +generateReport() void
+        +manageUsers() void
     }
     class MaintenanceStaff {
-        +String department
-        +updateTaskStatus()
+        +viewAssignments() void
+        +acceptTask() void
+        +updateProgress() void
+        +markResolved() void
     }
     class Complaint {
-        +int complaintId
-        +String category
+        +int id
+        +String complaint_number
+        +String title
         +String description
+        +String priority
         +String status
-        +Date dateFiled
-        +getDetails()
-        +updateStatus()
+        +String image_path
+        +Timestamp created_at
+        +Timestamp resolved_at
+        +Timestamp closed_at
+        +submit() void
+        +updateStatus(newStatus) void
     }
-    class Assignment {
-        +int assignmentId
-        +Date assignedDate
+    class ComplaintCategory {
+        +int id
+        +String name
+        +String description
+        +Boolean is_active
+    }
+    class Location {
+        +int id
+        +String building
+        +String floor
+        +String room
+        +Boolean is_active
+        +getDisplayName() String
+    }
+    class ComplaintAssignment {
+        +int id
+        +Timestamp assigned_at
         +String notes
+    }
+    class ComplaintUpdate {
+        +int id
+        +String old_status
+        +String new_status
+        +String remarks
+        +Timestamp created_at
+    }
+    class Feedback {
+        +int id
+        +int rating
+        +String comments
+        +Timestamp created_at
     }
 
     User <|-- Student
-    User <|-- Admin
+    User <|-- Faculty
+    User <|-- Administrator
     User <|-- MaintenanceStaff
-    Student "1" -- "*" Complaint : Submits
-    Admin "1" -- "*" Assignment : Manages
-    MaintenanceStaff "1" -- "*" Assignment : Receives
-    Complaint "1" -- "1" Assignment : Has
+
+    Student "1" --> "*" Complaint : submits
+    Faculty "1" --> "*" Complaint : submits
+    Complaint "*" --> "1" ComplaintCategory : categorized by
+    Complaint "*" --> "1" Location : located at
+    Administrator "1" --> "*" ComplaintAssignment : creates
+    ComplaintAssignment "*" --> "1" Complaint : assigned to
+    ComplaintAssignment "*" --> "1" MaintenanceStaff : assigned to
+    Complaint "1" --> "*" ComplaintUpdate : has history
+    Complaint "1" --> "0..1" Feedback : receives
 ```
 
 ### 6. Explanation
-- **User Class:** Base class representing any system user.
-- **Student, Admin, MaintenanceStaff:** Inherit from User, representing specific actor roles.
-- **Complaint Class:** Represents the core entity with status and details.
-- **Assignment Class:** Represents the linking entity when a complaint is assigned to staff.
+
+| Class | Role | Maps to DB Table |
+|-------|------|-----------------|
+| **User** | Base class for all actors; stores credentials | `users` |
+| **Student / Faculty** | Submitters of complaints (extends User) | `users` (role='STUDENT'/'FACULTY') |
+| **Administrator** | Manages all complaints, assigns, generates reports | `users` (role='ADMIN') |
+| **MaintenanceStaff** | Receives tasks, updates progress | `users` (role='MAINTENANCE') |
+| **Complaint** | Core entity with lifecycle status | `complaints` |
+| **ComplaintCategory** | Classifies complaint type | `complaint_categories` |
+| **Location** | Physical campus location | `locations` |
+| **ComplaintAssignment** | Links complaint to maintenance staff | `complaint_assignments` |
+| **ComplaintUpdate** | Audit trail of all status changes | `complaint_updates` |
+| **Feedback** | User rating after resolution | `feedback` |
+
+**Key Relationships:**
+- **Inheritance:** Student, Faculty, Administrator, MaintenanceStaff all extend User.
+- **Association:** A Student/Faculty submits many Complaints; each Complaint belongs to one User.
+- **Dependency:** Each Complaint has one Category and one Location.
+- **Aggregation:** An Administrator creates ComplaintAssignments; a MaintenanceStaff receives them.
+- **Composition:** A Complaint owns its ComplaintUpdates (deletes cascade).
+- **Association:** A Complaint optionally has one Feedback entry.
 
 ### 7. Result
-The structural Class Diagram for the CCMS was successfully modeled and analyzed, defining key entities and their OOP relationships.
+The structural Class Diagram for the CCMS was successfully modeled with **10 classes**, **4 inheritance relationships**, and **6 association/composition relationships**, all consistent with the implemented database schema and backend controllers.
+

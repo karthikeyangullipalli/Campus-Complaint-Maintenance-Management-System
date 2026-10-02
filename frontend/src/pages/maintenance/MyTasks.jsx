@@ -1,116 +1,98 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
-import api from '../../utils/api';
-import StatusBadge from '../../components/common/StatusBadge';
-import PriorityBadge from '../../components/common/PriorityBadge';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { formatDate } from '../../utils/helpers';
-import { FiSearch, FiFilter } from 'react-icons/fi';
 
 const MyTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     fetchTasks();
-  }, [statusFilter]);
+  }, []);
 
   const fetchTasks = async () => {
-    setLoading(true);
     try {
-      const res = await api.get(`/complaints/assigned${statusFilter ? `?status=${statusFilter}` : ''}`);
-      setTasks(res.data.complaints || []);
+      const res = await axios.get('/api/assignments/my');
+      setTasks(res.data.data || []);
     } catch (error) {
-      console.error("Error fetching tasks", error);
+      console.error('Error fetching tasks:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredTasks = tasks.filter(t => 
-    t.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    t.id.toString().includes(searchTerm)
-  );
+  const handleStatusUpdate = async (id, new_status, remarks = '') => {
+    try {
+      await axios.put(`/api/complaints/${id}/status`, { new_status, remarks });
+      fetchTasks();
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
+  };
+
+  if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Assigned Tasks</h1>
+    <div className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">My Assigned Tasks</h1>
+      
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b">
+              <th className="p-4 font-semibold text-sm text-gray-600">Complaint #</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Title & Location</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Category</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Status</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Assigned At</th>
+              <th className="p-4 font-semibold text-sm text-gray-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map(task => (
+              <tr key={task.id} className="border-b hover:bg-gray-50">
+                <td className="p-4 text-sm font-medium text-gray-900">{task.complaint_number}</td>
+                <td className="p-4 text-sm text-gray-700">
+                  <div className="font-semibold">{task.title}</div>
+                  <div className="text-xs text-gray-500">{task.location_name}</div>
+                </td>
+                <td className="p-4 text-sm text-gray-700">{task.category_name}</td>
+                <td className="p-4 text-sm text-gray-700">
+                  <span className={`px-2 py-1 text-xs rounded-full ${task.status === 'RESOLVED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {task.status}
+                  </span>
+                </td>
+                <td className="p-4 text-sm text-gray-700">{new Date(task.assigned_at).toLocaleString()}</td>
+                <td className="p-4 text-sm space-x-2">
+                  <Link to={`/maintenance/tasks/${task.id}`} className="text-blue-600 hover:underline mr-2">View</Link>
+                  {task.status === 'ASSIGNED' && (
+                    <button 
+                      onClick={() => handleStatusUpdate(task.id, 'IN_PROGRESS')}
+                      className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                    >
+                      Start Work
+                    </button>
+                  )}
+                  {task.status === 'IN_PROGRESS' && (
+                    <button 
+                      onClick={() => {
+                        const remarks = prompt("Resolution remarks:");
+                        if (remarks !== null) handleStatusUpdate(task.id, 'RESOLVED', remarks);
+                      }}
+                      className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                    >
+                      Mark Resolved
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {tasks.length === 0 && (
+          <div className="p-4 text-center text-gray-500">No tasks assigned to you right now.</div>
+        )}
       </div>
-
-      <div className="bg-white shadow-sm rounded-lg border border-gray-100 mb-6 p-4 flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="relative flex-1 max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FiSearch className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 border"
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center space-x-2">
-          <FiFilter className="text-gray-400" />
-          <select 
-            className="border-gray-300 rounded-md text-sm py-2 pl-3 pr-10 focus:ring-primary focus:border-primary border"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            <option value="ASSIGNED">Assigned (New)</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="RESOLVED">Resolved</option>
-            <option value="CLOSED">Closed</option>
-          </select>
-        </div>
-      </div>
-
-      {loading ? <LoadingSpinner /> : (
-        <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned On</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredTasks.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-4 text-center text-sm text-gray-500">No tasks found.</td>
-                  </tr>
-                ) : (
-                  filteredTasks.map(task => (
-                    <tr key={task.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{task.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{task.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{task.location?.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap"><PriorityBadge priority={task.priority} /></td>
-                      <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={task.status} /></td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(task.assignment?.createdAt)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Link to={`/maintenance/tasks/${task.id}`} className="text-primary hover:text-blue-900 bg-blue-50 px-3 py-1 rounded-md">View Task</Link>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

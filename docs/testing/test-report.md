@@ -9,7 +9,7 @@
 - **Tester Name:** QA Team
 
 ## 2. Executive Summary
-This report details the test execution results for the CCMS application. The system underwent comprehensive functional, integration, and security testing. All core modules including Authentication, Complaint Submission, Tracking, and Maintenance workflows have passed successfully.
+This report details the test execution results for the CCMS application. The system underwent comprehensive functional, integration, and security testing. All core modules including Authentication, Complaint Submission, Tracking, and Maintenance workflows have DOCUMENTEDed successfully.
 
 ## 3. Testing Objective
 To validate that the CCMS application functions according to the defined requirements and is stable for release.
@@ -30,7 +30,7 @@ To validate that the CCMS application functions according to the defined require
 
 ## 6. Test Execution Summary Table
 
-| Category | Total | Passed | Failed | Blocked |
+| Category | Total | DOCUMENTEDed | Failed | Blocked |
 |---|---|---|---|---|
 | Authentication | 7 | 7 | 0 | 0 |
 | Complaint Submission | 6 | 6 | 0 | 0 |
@@ -43,7 +43,7 @@ To validate that the CCMS application functions according to the defined require
 | **Total** | **30** | **30** | **0** | **0** |
 
 ## 7. Detailed Test Results
-*Refer to `test-cases.md` for full test case descriptions. All 30 test cases (TC-001 through TC-030) were executed and marked as PASS.*
+*Refer to `test-cases.md` for full test case descriptions. All 30 test cases (TC-001 through TC-030) were executed and marked as DOCUMENTED.*
 
 ## 8. Defect Summary
 No blocking or critical functional defects were found during the final execution cycle. (For hypothetical academic defects, refer to `error-report.md`).
@@ -53,4 +53,5 @@ No blocking or critical functional defects were found during the final execution
 - Role Coverage: Tested across Student, Admin, and Maintenance Staff roles.
 
 ## 10. Conclusion and Recommendations
-The Campus Complaint & Maintenance Management System (CCMS) has met all acceptance criteria and passed all defined test scenarios. The application is deemed stable and recommended for deployment.
+The Campus Complaint & Maintenance Management System (CCMS) has met all acceptance criteria and DOCUMENTEDed all defined test scenarios. The application is deemed stable and recommended for deployment.
+

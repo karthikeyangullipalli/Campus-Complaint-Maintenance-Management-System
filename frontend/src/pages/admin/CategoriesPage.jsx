@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../utils/api';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newCat, setNewCat] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -13,64 +13,103 @@ const CategoriesPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await api.get('/categories');
-      setCategories(res.data);
+      const res = await axios.get('/api/categories');
+      setCategories(res.data.data || []);
     } catch (error) {
-      console.error("Error fetching categories", error);
+      console.error('Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAdd = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/categories', newCat);
-      setNewCat({ name: '', description: '' });
+      if (editingId) {
+        await axios.put(`/api/categories/${editingId}`, formData);
+      } else {
+        await axios.post('/api/categories', formData);
+      }
+      setFormData({ name: '', description: '' });
+      setEditingId(null);
       fetchCategories();
     } catch (error) {
-      console.error("Error adding category", error);
+      console.error('Error saving category:', error);
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  const handleEdit = (cat) => {
+    setEditingId(cat.id);
+    setFormData({ name: cat.name, description: cat.description || '' });
+  };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Manage Categories</h1>
-      
-      <div className="bg-white shadow-sm rounded-lg border border-gray-100 p-6 mb-6">
-        <h2 className="text-lg font-medium mb-4">Add New Category</h2>
-        <form onSubmit={handleAdd} className="flex gap-4 items-end">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input required type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2 px-3 border" value={newCat.name} onChange={e => setNewCat({...newCat, name: e.target.value})} />
+    <div className="p-6 max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
+      <div className="flex-1">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Manage Categories</h1>
+        
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <div className="bg-white rounded shadow overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b">
+                  <th className="p-4 font-semibold text-sm text-gray-600">Name</th>
+                  <th className="p-4 font-semibold text-sm text-gray-600">Description</th>
+                  <th className="p-4 font-semibold text-sm text-gray-600">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map(cat => (
+                  <tr key={cat.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4 text-sm font-medium text-gray-900">{cat.name}</td>
+                    <td className="p-4 text-sm text-gray-700">{cat.description}</td>
+                    <td className="p-4 text-sm text-blue-600">
+                      <button onClick={() => handleEdit(cat)} className="hover:underline">Edit</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2 px-3 border" value={newCat.description} onChange={e => setNewCat({...newCat, description: e.target.value})} />
-          </div>
-          <button type="submit" className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-800">Add</button>
-        </form>
+        )}
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {categories.map(cat => (
-              <tr key={cat.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cat.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cat.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="w-full md:w-80">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="font-semibold text-lg mb-4">{editingId ? 'Edit Category' : 'Add Category'}</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input 
+                type="text" required
+                className="w-full p-2 border rounded text-sm"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea 
+                rows="3"
+                className="w-full p-2 border rounded text-sm"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              ></textarea>
+            </div>
+            <div className="flex gap-2">
+              <button type="submit" className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                {editingId ? 'Update' : 'Add'}
+              </button>
+              {editingId && (
+                <button type="button" onClick={() => { setEditingId(null); setFormData({name:'', description:''}); }} className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
