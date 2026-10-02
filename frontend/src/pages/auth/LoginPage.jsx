@@ -112,12 +112,12 @@ const LoginPage = () => {
         </div>
         
         <div className="mt-8 bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
-          <p className="font-bold mb-2">Demo Credentials:</p>
+          <p className="font-bold mb-2">Demo Credentials (Password: Admin@123):</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Admin: admin@example.com / password</li>
-            <li>Student: student@example.com / password</li>
-            <li>Faculty: faculty@example.com / password</li>
-            <li>Maintenance: staff@example.com / password</li>
+            <li>Admin: <span className="font-mono">admin@ccms.local</span></li>
+            <li>Student: <span className="font-mono">student@ccms.local</span></li>
+            <li>Faculty: <span className="font-mono">faculty@ccms.local</span></li>
+            <li>Maintenance: <span className="font-mono">maintenance@ccms.local</span></li>
           </ul>
         </div>
       </div>

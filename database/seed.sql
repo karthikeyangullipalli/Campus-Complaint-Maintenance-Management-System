@@ -1,13 +1,13 @@
-USE ccms_db;
+﻿USE ccms_db;
 
 -- 1. Users
 -- Password for all users is Admin@123 (hashed)
 INSERT INTO users (name, email, password_hash, role, department, phone) VALUES
-('Admin User', 'admin@ccms.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh23', 'ADMIN', 'IT', '1234567890'),
-('Student User', 'student@ccms.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh23', 'STUDENT', 'Computer Science', '1234567891'),
-('Faculty User', 'faculty@ccms.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh23', 'FACULTY', 'Mechanical Engineering', '1234567892'),
-('Maintenance Staff 1', 'maintenance@ccms.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh23', 'MAINTENANCE', 'Facilities', '1234567893'),
-('Maintenance Staff 2', 'maintenance2@ccms.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh23', 'MAINTENANCE', 'Facilities', '1234567894');
+('Admin User', 'admin@ccms.local', '$2a$10$qLLrqh.y6Z8v20m19FfX.e.uswldLPn3ByBwh5Wip/tFu08Y9ciVK', 'ADMIN', 'IT', '1234567890'),
+('Student User', 'student@ccms.local', '$2a$10$qLLrqh.y6Z8v20m19FfX.e.uswldLPn3ByBwh5Wip/tFu08Y9ciVK', 'STUDENT', 'Computer Science', '1234567891'),
+('Faculty User', 'faculty@ccms.local', '$2a$10$qLLrqh.y6Z8v20m19FfX.e.uswldLPn3ByBwh5Wip/tFu08Y9ciVK', 'FACULTY', 'Mechanical Engineering', '1234567892'),
+('Maintenance Staff 1', 'maintenance@ccms.local', '$2a$10$qLLrqh.y6Z8v20m19FfX.e.uswldLPn3ByBwh5Wip/tFu08Y9ciVK', 'MAINTENANCE', 'Facilities', '1234567893'),
+('Maintenance Staff 2', 'maintenance2@ccms.local', '$2a$10$qLLrqh.y6Z8v20m19FfX.e.uswldLPn3ByBwh5Wip/tFu08Y9ciVK', 'MAINTENANCE', 'Facilities', '1234567894');
 
 -- 2. Complaint Categories
 INSERT INTO complaint_categories (name, description) VALUES
@@ -77,3 +77,4 @@ INSERT INTO complaint_updates (complaint_id, updated_by, old_status, new_status,
 INSERT INTO feedback (complaint_id, user_id, rating, comments) VALUES
 (5, 2, 4, 'Quick response, but took a while to bring a replacement chair.'),
 (6, 3, 5, 'Excellent and fast service! Thanks.');
+
