@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
@@ -13,7 +13,7 @@ const CategoriesPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('/api/categories');
+      const res = await api.get('/categories');
       setCategories(res.data.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -26,15 +26,16 @@ const CategoriesPage = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`/api/categories/${editingId}`, formData);
+        await api.put(`/categories/${editingId}`, formData);
       } else {
-        await axios.post('/api/categories', formData);
+        await api.post('/categories', formData);
       }
       setFormData({ name: '', description: '' });
       setEditingId(null);
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
+      alert(error.response?.data?.message || 'Error saving category');
     }
   };
 

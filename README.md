@@ -2,7 +2,8 @@
 
 > **Course:** Software Engineering Lab &nbsp;|&nbsp; **Code:** 23CS4219  
 > **Degree:** B.Tech Computer Science & Engineering  
-> **Academic Year:** 2024–25
+> **Academic Year:** 2024–25  
+> **GitHub Repository:** [https://github.com/karthikeyangullipalli/Campus-Complaint-Maintenance-Management-System](https://github.com/karthikeyangullipalli/Campus-Complaint-Maintenance-Management-System)
 
 ---
 
@@ -220,16 +221,32 @@ campus-complaint-maintenance-system/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/campus-complaint-maintenance-system.git
-cd campus-complaint-maintenance-system
+git clone https://github.com/karthikeyangullipalli/Campus-Complaint-Maintenance-Management-System.git
+cd Campus-Complaint-Maintenance-Management-System
 ```
 
 ### 2. Database Setup
 
+Make sure your MySQL 8.x server is running. Then load the schema and initial seed data:
+
+**Command Prompt / Linux / macOS:**
 ```bash
-# Open MySQL and run:
 mysql -u root -p < database/schema.sql
 mysql -u root -p ccms_db < database/seed.sql
+```
+
+**Windows PowerShell:**
+```powershell
+Get-Content database/schema.sql | mysql -u root -p
+Get-Content database/seed.sql | mysql -u root -p ccms_db
+```
+
+**Alternatively inside MySQL CLI:**
+```sql
+mysql -u root -p
+source database/schema.sql;
+use ccms_db;
+source database/seed.sql;
 ```
 
 ### 3. Backend Setup
@@ -238,7 +255,7 @@ mysql -u root -p ccms_db < database/seed.sql
 cd backend
 npm install
 cp .env.example .env
-# Edit .env with your database credentials
+# Edit .env with your local MySQL password and configurations
 npm run dev
 ```
 
@@ -265,6 +282,7 @@ Create `backend/.env` from `backend/.env.example`:
 ```env
 PORT=5000
 DB_HOST=localhost
+DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=ccms_db

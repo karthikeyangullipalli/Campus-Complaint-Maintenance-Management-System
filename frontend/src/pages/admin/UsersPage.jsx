@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -11,7 +11,7 @@ const UsersPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('/api/users');
+      const res = await api.get('/users');
       setUsers(res.data.data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -21,12 +21,13 @@ const UsersPage = () => {
   };
 
   const handleDeactivate = async (id) => {
-    if(!window.confirm('Deactivate this user?')) return;
+    if (!window.confirm('Deactivate this user?')) return;
     try {
-      await axios.put(`/api/users/${id}`, { is_active: false });
+      await api.put(`/users/${id}`, { is_active: false });
       fetchUsers();
     } catch (error) {
       console.error('Error deactivating user:', error);
+      alert(error.response?.data?.message || 'Error deactivating user');
     }
   };
 
@@ -60,12 +61,9 @@ const UsersPage = () => {
                     {user.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
-                <td className="p-4 text-sm">
-                  {user.is_active && (
-                    <button 
-                      onClick={() => handleDeactivate(user.id)}
-                      className="text-red-600 hover:underline"
-                    >
+                <td className="p-4 text-sm text-red-600">
+                  {user.is_active && user.role !== 'ADMIN' && (
+                    <button onClick={() => handleDeactivate(user.id)} className="hover:underline">
                       Deactivate
                     </button>
                   )}

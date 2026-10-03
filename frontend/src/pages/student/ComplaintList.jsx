@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
@@ -13,8 +13,7 @@ const ComplaintList = () => {
 
   const fetchComplaints = async () => {
     try {
-      const res = await axios.get('/api/complaints');
-      // Fix: Unwrap from res.data.data
+      const res = await api.get('/complaints');
       setComplaints(res.data.data || []);
     } catch (error) {
       console.error('Error fetching complaints:', error);

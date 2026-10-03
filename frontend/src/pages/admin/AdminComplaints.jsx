@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const AdminComplaints = () => {
   const [complaints, setComplaints] = useState([]);
@@ -14,7 +14,7 @@ const AdminComplaints = () => {
 
   const fetchComplaints = async () => {
     try {
-      const res = await axios.get('/api/complaints');
+      const res = await api.get('/complaints');
       setComplaints(res.data.data || []);
     } catch (error) {
       console.error('Error fetching complaints:', error);
@@ -49,7 +49,7 @@ const AdminComplaints = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
         >
           <option value="">All Statuses</option>
-          <option value="PENDING">PENDING</option>
+          <option value="NEW">NEW</option>
           <option value="VERIFIED">VERIFIED</option>
           <option value="ASSIGNED">ASSIGNED</option>
           <option value="IN_PROGRESS">IN_PROGRESS</option>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const LocationsPage = () => {
   const [locations, setLocations] = useState([]);
@@ -12,7 +12,7 @@ const LocationsPage = () => {
 
   const fetchLocations = async () => {
     try {
-      const res = await axios.get('/api/locations');
+      const res = await api.get('/locations');
       setLocations(res.data.data || []);
     } catch (error) {
       console.error('Error fetching locations:', error);
@@ -24,11 +24,12 @@ const LocationsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/locations', formData);
+      await api.post('/locations', formData);
       setFormData({ building: '', floor: '', room: '', description: '' });
       fetchLocations();
     } catch (error) {
       console.error('Error saving location:', error);
+      alert(error.response?.data?.message || 'Error saving location');
     }
   };
 

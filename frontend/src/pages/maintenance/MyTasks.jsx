@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import api from '../../utils/api';
 
 const MyTasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -12,7 +12,7 @@ const MyTasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get('/api/assignments/my');
+      const res = await api.get('/assignments/my');
       setTasks(res.data.data || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -21,12 +21,13 @@ const MyTasks = () => {
     }
   };
 
-  const handleStatusUpdate = async (id, new_status, remarks = '') => {
+  const handleStatusUpdate = async (complaintId, new_status, remarks = '') => {
     try {
-      await axios.put(`/api/complaints/${id}/status`, { new_status, remarks });
+      await api.put(`/complaints/${complaintId}/status`, { new_status, remarks });
       fetchTasks();
     } catch (error) {
       console.error('Error updating task status:', error);
+      alert(error.response?.data?.message || 'Error updating status');
     }
   };
 
@@ -49,48 +50,51 @@ const MyTasks = () => {
             </tr>
           </thead>
           <tbody>
-            {tasks.map(task => (
-              <tr key={task.id} className="border-b hover:bg-gray-50">
-                <td className="p-4 text-sm font-medium text-gray-900">{task.complaint_number}</td>
-                <td className="p-4 text-sm text-gray-700">
-                  <div className="font-semibold">{task.title}</div>
-                  <div className="text-xs text-gray-500">{task.location_name}</div>
-                </td>
-                <td className="p-4 text-sm text-gray-700">{task.category_name}</td>
-                <td className="p-4 text-sm text-gray-700">
-                  <span className={`px-2 py-1 text-xs rounded-full ${task.status === 'RESOLVED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {task.status}
-                  </span>
-                </td>
-                <td className="p-4 text-sm text-gray-700">{new Date(task.assigned_at).toLocaleString()}</td>
-                <td className="p-4 text-sm space-x-2">
-                  <Link to={`/maintenance/tasks/${task.id}`} className="text-blue-600 hover:underline mr-2">View</Link>
-                  {task.status === 'ASSIGNED' && (
-                    <button 
-                      onClick={() => handleStatusUpdate(task.id, 'IN_PROGRESS')}
-                      className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
-                    >
-                      Start Work
-                    </button>
-                  )}
-                  {task.status === 'IN_PROGRESS' && (
-                    <button 
-                      onClick={() => {
-                        const remarks = prompt("Resolution remarks:");
-                        if (remarks !== null) handleStatusUpdate(task.id, 'RESOLVED', remarks);
-                      }}
-                      className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-                    >
-                      Mark Resolved
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {tasks.map(task => {
+              const targetComplaintId = task.complaint_id || task.id;
+              return (
+                <tr key={task.id} className="border-b hover:bg-gray-50">
+                  <td className="p-4 text-sm font-medium text-gray-900">{task.complaint_number}</td>
+                  <td className="p-4 text-sm text-gray-700">
+                    <div className="font-semibold">{task.title}</div>
+                    <div className="text-xs text-gray-500">{task.location_name}</div>
+                  </td>
+                  <td className="p-4 text-sm text-gray-700">{task.category_name}</td>
+                  <td className="p-4 text-sm text-gray-700">
+                    <span className={`px-2 py-1 text-xs rounded-full ${task.status === 'RESOLVED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      {task.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-sm text-gray-700">{new Date(task.assigned_at).toLocaleString()}</td>
+                  <td className="p-4 text-sm space-x-2">
+                    <Link to={`/maintenance/tasks/${targetComplaintId}`} className="text-blue-600 hover:underline mr-2">View</Link>
+                    {task.status === 'ASSIGNED' && (
+                      <button 
+                        onClick={() => handleStatusUpdate(targetComplaintId, 'IN_PROGRESS')}
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                      >
+                        Start Work
+                      </button>
+                    )}
+                    {task.status === 'IN_PROGRESS' && (
+                      <button 
+                        onClick={() => {
+                          const remarks = prompt("Resolution remarks:");
+                          if (remarks !== null) handleStatusUpdate(targetComplaintId, 'RESOLVED', remarks);
+                        }}
+                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                      >
+                        Mark Resolved
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {tasks.length === 0 && (
-          <div className="p-4 text-center text-gray-500">No tasks assigned to you right now.</div>
+          <div className="p-4 text-center text-gray-500">No tasks currently assigned.</div>
         )}
       </div>
     </div>

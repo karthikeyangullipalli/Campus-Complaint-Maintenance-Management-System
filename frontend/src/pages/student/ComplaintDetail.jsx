@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const ComplaintDetail = () => {
   const { id } = useParams();
@@ -15,7 +15,7 @@ const ComplaintDetail = () => {
 
   const fetchComplaint = async () => {
     try {
-      const res = await axios.get(`/api/complaints/${id}`);
+      const res = await api.get(`/complaints/${id}`);
       setComplaint(res.data.data);
     } catch (error) {
       console.error('Error fetching complaint:', error);
@@ -28,7 +28,7 @@ const ComplaintDetail = () => {
     e.preventDefault();
     setFeedbackSubmitting(true);
     try {
-      await axios.post(`/api/complaints/${id}/feedback`, feedback);
+      await api.post(`/complaints/${id}/feedback`, feedback);
       fetchComplaint(); // Refresh
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -69,6 +69,17 @@ const ComplaintDetail = () => {
           <h3 className="font-semibold text-lg mb-2">Description</h3>
           <p className="text-gray-700 whitespace-pre-wrap">{complaint.description}</p>
         </div>
+
+        {complaint.image_path && (
+          <div className="mb-6">
+            <h3 className="font-semibold text-lg mb-2">Attached Image</h3>
+            <img 
+              src={complaint.image_path} 
+              alt="Complaint attachment" 
+              className="max-h-80 rounded border shadow-sm object-contain"
+            />
+          </div>
+        )}
       </div>
 
       {complaint.updates && complaint.updates.length > 0 && (
@@ -79,7 +90,7 @@ const ComplaintDetail = () => {
               <div key={idx} className="border-l-2 border-blue-500 pl-4 py-1">
                 <p className="text-sm text-gray-800">
                   <span className="font-semibold">{update.updated_by_name || 'System'}</span> changed status from 
-                  <span className="font-semibold px-1">{update.old_status}</span> to 
+                  <span className="font-semibold px-1">{update.old_status || 'INITIAL'}</span> to 
                   <span className="font-semibold px-1">{update.new_status}</span>
                 </p>
                 {update.remarks && <p className="text-sm text-gray-600 mt-1 italic">"{update.remarks}"</p>}

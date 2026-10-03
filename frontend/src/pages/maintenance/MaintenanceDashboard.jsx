@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import api from '../../utils/api';
 
 const MaintenanceDashboard = () => {
   const [data, setData] = useState({ byStatus: [], tasks: [] });
@@ -12,7 +12,7 @@ const MaintenanceDashboard = () => {
 
   const fetchDashboard = async () => {
     try {
-      const res = await axios.get('/api/maintenance/dashboard');
+      const res = await api.get('/dashboard/maintenance');
       setData(res.data.data || { byStatus: [], tasks: [] });
     } catch (error) {
       console.error('Error fetching maintenance dashboard:', error);
@@ -56,18 +56,26 @@ const MaintenanceDashboard = () => {
               {data.tasks.map(task => (
                 <tr key={task.id} className="border-b hover:bg-gray-50">
                   <td className="p-3 text-sm font-medium">{task.complaint_number}</td>
-                  <td className="p-3 text-sm"><Link to={`/maintenance/tasks/${task.id}`} className="text-blue-600 hover:underline">{task.title}</Link></td>
                   <td className="p-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">{task.status}</span>
+                    <Link to={`/maintenance/tasks/${task.id}`} className="text-blue-600 hover:underline">
+                      {task.title}
+                    </Link>
                   </td>
-                  <td className="p-3 text-sm">{new Date(task.created_at).toLocaleDateString()}</td>
+                  <td className="p-3 text-sm">
+                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                      {task.status}
+                    </span>
+                  </td>
+                  <td className="p-3 text-sm text-gray-500">
+                    {new Date(task.assigned_at).toLocaleDateString()}
+                  </td>
                 </tr>
               ))}
-              {data.tasks.length === 0 && (
-                <tr><td colSpan="4" className="p-4 text-center text-gray-500">No recent tasks.</td></tr>
-              )}
             </tbody>
           </table>
+          {data.tasks.length === 0 && (
+            <div className="p-4 text-center text-gray-500">No tasks assigned yet.</div>
+          )}
         </div>
       </div>
     </div>

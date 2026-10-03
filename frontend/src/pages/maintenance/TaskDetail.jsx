@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const TaskDetail = () => {
   const { id } = useParams();
@@ -15,9 +15,9 @@ const TaskDetail = () => {
 
   const fetchTask = async () => {
     try {
-      const res = await axios.get(`/api/complaints/${id}`);
+      const res = await api.get(`/complaints/${id}`);
       setTask(res.data.data);
-      setNewStatus(res.data.data.status);
+      setNewStatus(res.data.data?.status || '');
     } catch (error) {
       console.error('Error fetching task:', error);
     } finally {
@@ -28,11 +28,12 @@ const TaskDetail = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/complaints/${id}/status`, { new_status: newStatus, remarks });
+      await api.put(`/complaints/${id}/status`, { new_status: newStatus, remarks });
       setRemarks('');
       fetchTask();
     } catch (error) {
       console.error('Error updating status:', error);
+      alert(error.response?.data?.message || 'Error updating status');
     }
   };
 
@@ -58,7 +59,7 @@ const TaskDetail = () => {
           <div className="grid grid-cols-2 gap-4 text-sm mb-6">
             <div><span className="font-semibold text-gray-600">Category:</span> {task.category_name}</div>
             <div><span className="font-semibold text-gray-600">Location:</span> {task.location_name}</div>
-            <div><span className="font-semibold text-gray-600">Priority:</span> {task.priority || 'Normal'}</div>
+            <div><span className="font-semibold text-gray-600">Priority:</span> {task.priority}</div>
             <div><span className="font-semibold text-gray-600">Date Filed:</span> {new Date(task.created_at).toLocaleString()}</div>
           </div>
 
@@ -66,14 +67,25 @@ const TaskDetail = () => {
             <h3 className="font-semibold text-lg mb-2">Description</h3>
             <p className="text-gray-700 whitespace-pre-wrap">{task.description}</p>
           </div>
+
+          {task.image_path && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-lg mb-2">Attached Image</h3>
+              <img 
+                src={task.image_path} 
+                alt="Task attachment" 
+                className="max-h-80 rounded border shadow-sm object-contain"
+              />
+            </div>
+          )}
         </div>
 
         {task.updates && task.updates.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-semibold text-lg mb-4">Task History</h3>
+            <h3 className="font-semibold text-lg mb-4">Task Updates & Remarks</h3>
             <div className="space-y-4">
               {task.updates.map((update, idx) => (
-                <div key={idx} className="border-l-2 border-blue-500 pl-4 py-1">
+                <div key={idx} className="border-l-2 border-green-500 pl-4 py-1">
                   <p className="text-sm text-gray-800">
                     <span className="font-semibold">{update.updated_by_name || 'System'}</span> changed status to 
                     <span className="font-semibold px-1">{update.new_status}</span>
@@ -88,13 +100,13 @@ const TaskDetail = () => {
       </div>
 
       <div className="w-full md:w-80">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-semibold text-lg mb-4">Update Status</h3>
+        <div className="bg-white rounded-lg shadow p-6 sticky top-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Update Progress</h2>
           <form onSubmit={handleUpdate}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">New Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select 
-                className="w-full p-2 border rounded text-sm"
+                className="w-full p-2 border rounded text-sm bg-white"
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
               >
@@ -103,22 +115,20 @@ const TaskDetail = () => {
                 <option value="RESOLVED">RESOLVED</option>
               </select>
             </div>
+            
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Remarks / Fix Details</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Work Remarks</label>
               <textarea 
-                rows="3" 
-                required={newStatus === 'RESOLVED'}
+                rows="4" 
                 className="w-full p-2 border rounded text-sm"
+                placeholder="Details of repair work completed or current issue..."
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Describe what was done..."
               ></textarea>
             </div>
-            <button 
-              type="submit" 
-              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Update Task
+
+            <button type="submit" className="w-full py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700">
+              Submit Update
             </button>
           </form>
         </div>

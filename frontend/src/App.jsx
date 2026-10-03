@@ -33,7 +33,7 @@ function App() {
       <Route path="/" element={
         !isAuthenticated ? <Navigate to="/login" /> :
         user.role === 'ADMIN' ? <Navigate to="/admin/dashboard" /> :
-        user.role === 'MAINTENANCE_STAFF' ? <Navigate to="/maintenance/dashboard" /> :
+        (user.role === 'MAINTENANCE' || user.role === 'MAINTENANCE_STAFF') ? <Navigate to="/maintenance/dashboard" /> :
         <Navigate to="/student/dashboard" />
       } />
       
@@ -60,7 +60,7 @@ function App() {
       </Route>
 
       {/* Maintenance Routes */}
-      <Route path="/maintenance" element={<ProtectedRoute allowedRoles={['MAINTENANCE_STAFF']}><MaintenanceLayout /></ProtectedRoute>}>
+      <Route path="/maintenance" element={<ProtectedRoute allowedRoles={['MAINTENANCE', 'MAINTENANCE_STAFF']}><MaintenanceLayout /></ProtectedRoute>}>
         <Route path="dashboard" element={<MaintenanceDashboard />} />
         <Route path="tasks" element={<MyTasks />} />
         <Route path="tasks/:id" element={<TaskDetail />} />

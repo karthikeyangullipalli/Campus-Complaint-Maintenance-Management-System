@@ -87,8 +87,8 @@ exports.getMyAssignments = async (req, res, next) => {
   try {
     const staffId = req.user.id;
     const [assignments] = await db.execute(`
-      SELECT ca.id, ca.assigned_at, ca.notes,
-             c.id as complaint_id, c.complaint_number, c.title, c.description,
+      SELECT ca.id as assignment_id, ca.assigned_at, ca.notes,
+             c.id, c.id as complaint_id, c.complaint_number, c.title, c.description,
              c.status, c.priority,
              CONCAT(l.building, ' - ', IFNULL(l.floor,''), ' ', IFNULL(l.room,'')) as location_name,
              cc.name as category_name

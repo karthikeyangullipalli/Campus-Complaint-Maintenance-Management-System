@@ -69,6 +69,7 @@ exports.getComplaints = async (req, res, next) => {
 
 exports.getComplaintById = async (req, res, next) => {
   try {
+    const idParam = req.params.id;
     const [complaints] = await db.execute(`
       SELECT c.*, cc.name as category_name,
              CONCAT(l.building, ' - ', IFNULL(l.floor,''), ' ', IFNULL(l.room,'')) as location_name,
@@ -77,23 +78,25 @@ exports.getComplaintById = async (req, res, next) => {
       LEFT JOIN complaint_categories cc ON c.category_id = cc.id
       LEFT JOIN locations l ON c.location_id = l.id
       LEFT JOIN users u ON c.user_id = u.id
-      WHERE c.id = ?
-    `, [req.params.id]);
+      WHERE c.id = ? OR c.complaint_number = ?
+    `, [idParam, idParam]);
 
     if (complaints.length === 0) {
       return res.status(404).json({ success: false, message: 'Complaint not found' });
     }
 
-    // Also fetch updates history
+    const complaint = complaints[0];
+
+    // Also fetch updates history using complaint.id (numeric PK)
     const [updates] = await db.execute(`
       SELECT cu.*, u.name as updated_by_name
       FROM complaint_updates cu
       LEFT JOIN users u ON cu.updated_by = u.id
       WHERE cu.complaint_id = ?
       ORDER BY cu.created_at ASC
-    `, [req.params.id]);
+    `, [complaint.id]);
 
-    res.status(200).json({ success: true, data: { ...complaints[0], updates } });
+    res.status(200).json({ success: true, data: { ...complaint, updates } });
   } catch (err) {
     next(err);
   }

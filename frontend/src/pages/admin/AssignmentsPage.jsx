@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const AssignmentsPage = () => {
   const [assignments, setAssignments] = useState([]);
@@ -11,7 +11,7 @@ const AssignmentsPage = () => {
 
   const fetchAssignments = async () => {
     try {
-      const res = await axios.get('/api/assignments');
+      const res = await api.get('/assignments');
       setAssignments(res.data.data || []);
     } catch (error) {
       console.error('Error fetching assignments:', error);
