@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+classDiagram
+    class User {
+        +int id
+        +string name
+        +string email
+        +string password_hash
+        +string role
+        +string department
+        +string phone
+        +boolean is_active
+        +timestamp created_at
+        +login(email, password)
+        +logout()
+    }
+
+    class Complaint {
+        +int id
+        +string complaint_number
+        +int user_id
+        +int category_id
+        +int location_id
+        +string title
+        +string description
+        +string priority
+        +string status
+        +string image_path
+        +timestamp created_at
+        +timestamp resolved_at
+        +timestamp closed_at
+        +createComplaint()
+        +updateStatus(new_status)
+    }
+
+    class ComplaintCategory {
+        +int id
+        +string name
+        +string description
+        +boolean is_active
+        +getCategories()
+    }
+
+    class Location {
+        +int id
+        +string building
+        +string floor
+        +string room
+        +string description
+        +boolean is_active
+        +getDisplayName()
+    }
+
+    class ComplaintAssignment {
+        +int id
+        +int complaint_id
+        +int maintenance_staff_id
+        +int assigned_by
+        +timestamp assigned_at
+        +string notes
+        +assignStaff()
+    }
+
+    class ComplaintUpdate {
+        +int id
+        +int complaint_id
+        +int updated_by
+        +string old_status
+        +string new_status
+        +string remarks
+        +timestamp created_at
+        +logUpdate()
+    }
+
+    class Feedback {
+        +int id
+        +int complaint_id
+        +int user_id
+        +int rating
+        +string comments
+        +timestamp created_at
+        +submitFeedback()
+    }
+
+    User "1" --> "*" Complaint : "lodges"
+    ComplaintCategory "1" --> "*" Complaint : "classifies"
+    Location "1" --> "*" Complaint : "locates"
+    Complaint "1" --> "*" ComplaintAssignment : "receives"
+    User "1" --> "*" ComplaintAssignment : "executes/assigns"
+    Complaint "1" --> "*" ComplaintUpdate : "audited_by"
+    User "1" --> "*" ComplaintUpdate : "authorized_by"
+    Complaint "1" --> "0..1" Feedback : "evaluated_by"
+    User "1" --> "*" Feedback : "submits"
+    </div>
+</body>
+</html>

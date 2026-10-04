@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart LR
+    subgraph Actors
+        Student["Student / Faculty"]
+        Admin["Administrator"]
+        Staff["Maintenance Staff"]
+    end
+
+    subgraph CCMS["Campus Complaint Management System"]
+        UC01(["UC01: Register / Login"])
+        UC02(["UC02: Submit Complaint & Upload Image"])
+        UC03(["UC03: Track Own Complaints & History"])
+        UC04(["UC04: Submit Resolution Feedback"])
+        UC05(["UC05: Reopen Unresolved Complaint"])
+        UC06(["UC06: Verify / Reject Complaint"])
+        UC07(["UC07: Assign Complaint to Staff"])
+        UC08(["UC08: Close Resolved Complaint"])
+        UC09(["UC09: Manage Users, Categories & Locations"])
+        UC10(["UC10: View Admin Metrics & Dashboard"])
+        UC11(["UC11: View Assigned Maintenance Tasks"])
+        UC12(["UC12: Update Work Status & Add Remarks"])
+    end
+
+    Student --> UC01
+    Student --> UC02
+    Student --> UC03
+    Student --> UC04
+    Student --> UC05
+
+    Admin --> UC01
+    Admin --> UC06
+    Admin --> UC07
+    Admin --> UC08
+    Admin --> UC09
+    Admin --> UC10
+
+    Staff --> UC01
+    Staff --> UC11
+    Staff --> UC12
+    </div>
+</body>
+</html>

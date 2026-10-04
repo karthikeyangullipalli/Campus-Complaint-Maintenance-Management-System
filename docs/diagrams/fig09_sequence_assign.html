@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin as Administrator
+    participant UI as Admin ComplaintDetail
+    participant Client as Axios Client (api.js)
+    participant Server as Express REST API
+    participant DB as MySQL Database
+    actor Staff as Maintenance Staff
+
+    Admin->>UI: Opens NEW complaint
+    Admin->>UI: Clicks "Verify Complaint"
+    UI->>Client: PUT /api/complaints/:id/status { new_status: 'VERIFIED' }
+    Client->>Server: Request with JWT Header
+    Server->>Server: Check role == 'ADMIN' & VALID_TRANSITIONS['NEW']->'VERIFIED'
+    Server->>DB: UPDATE complaints SET status='VERIFIED' WHERE id=:id
+    Server->>DB: INSERT INTO complaint_updates (status='VERIFIED', updated_by=adminId)
+    Server-->>Client: 200 OK { success: true }
+    Client-->>UI: Complaint marked VERIFIED
+
+    Admin->>UI: Selects Maintenance Staff & enters assignment notes
+    Admin->>UI: Clicks "Assign Staff"
+    UI->>Client: POST /api/complaints/:id/assign { maintenance_staff_id, notes }
+    Client->>Server: Request with JWT Header
+    Server->>Server: Validate staff exists & role == 'MAINTENANCE'
+    Server->>DB: INSERT INTO complaint_assignments (complaint_id, staff_id, assigned_by, notes)
+    Server->>DB: UPDATE complaints SET status='ASSIGNED' WHERE id=:id
+    Server->>DB: INSERT INTO complaint_updates (status='ASSIGNED', remarks='Assigned to staff...')
+    Server-->>Client: 200 OK { success: true }
+    Client-->>UI: Complaint view updated with assigned staff info
+    Staff->>UI: Later logs in and sees task on Maintenance Dashboard
+    </div>
+</body>
+</html>

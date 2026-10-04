@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart TD
+    subgraph FrontendComponents["React 18 Client Components (SPA)"]
+        AuthContext["AuthContext<br/>(JWT Token & User State)"]
+        APIModule["api.js<br/>(Axios Instance & Interceptors)"]
+        CommonComp["Common Components<br/>(Navbar, Sidebar, StatusBadge, PriorityBadge)"]
+        StudentPages["Student Pages<br/>(StudentDashboard, NewComplaint, ComplaintList, ComplaintDetail)"]
+        AdminPages["Admin Pages<br/>(AdminDashboard, AdminComplaints, UsersPage, CategoriesPage, LocationsPage, AssignmentsPage)"]
+        MaintPages["Maintenance Pages<br/>(MaintenanceDashboard, MyTasks, TaskDetail)"]
+
+        AuthContext --> APIModule
+        APIModule --> StudentPages
+        APIModule --> AdminPages
+        APIModule --> MaintPages
+    end
+
+    subgraph BackendComponents["Express.js Server Components (REST API)"]
+        AuthMiddleware["Authentication & Authorization<br/>(verifyToken, requireRole)"]
+        UploadMiddleware["Multer Upload Handler<br/>(Image validation & storage)"]
+        
+        AuthCtrl["authController<br/>(register, login, getMe)"]
+        ComplaintCtrl["complaintController<br/>(CRUD, status history, role filter)"]
+        AssignCtrl["assignmentController<br/>(assignComplaint, getMyAssignments)"]
+        StatusCtrl["statusController<br/>(FSM transition validator)"]
+        DashCtrl["dashboardController<br/>(role-specific metrics)"]
+        FeedbackCtrl["feedbackController<br/>(ratings & comments)"]
+        RefCtrl["categoryController / locationController / userController<br/>(Reference Data Management)"]
+
+        AuthMiddleware --> AuthCtrl
+        AuthMiddleware --> ComplaintCtrl
+        AuthMiddleware --> AssignCtrl
+        AuthMiddleware --> StatusCtrl
+        AuthMiddleware --> DashCtrl
+        AuthMiddleware --> FeedbackCtrl
+        AuthMiddleware --> RefCtrl
+        UploadMiddleware --> ComplaintCtrl
+    end
+
+    subgraph DataStorage["MySQL 8 Database"]
+        MySQL[("ccms_db Relational Tables<br/>InnoDB Engine, Foreign Key Constraints")]
+    end
+
+    APIModule -->|"REST / HTTPS"| AuthMiddleware
+    BackendComponents -->|"MySQL2 Connection Pool"| MySQL
+    </div>
+</body>
+</html>

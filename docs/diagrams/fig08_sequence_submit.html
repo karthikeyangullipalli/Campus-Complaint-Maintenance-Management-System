@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Student as Student / Faculty
+    participant UI as React UI (NewComplaint)
+    participant Client as Axios Client (api.js)
+    participant Server as Express REST API
+    participant DB as MySQL Database
+
+    Student->>UI: Fills form (Title, Category, Location, Priority, Description, Image)
+    Student->>UI: Clicks "Submit Complaint"
+    UI->>Client: Formats multipart FormData payload
+    Client->>Server: POST /api/complaints (Bearer JWT Header)
+    Server->>Server: verifyToken checks JWT signature & active status
+    Server->>Server: generateComplaintId() -> CMP-YYYYMMDD-XXXXXX
+    Server->>DB: INSERT INTO complaints (title, category_id, location_id, priority, status='NEW'...)
+    DB-->>Server: Insert Success (insertId)
+    Server->>DB: INSERT INTO complaint_updates (complaint_id, updated_by, new_status='NEW', remarks='Complaint submitted')
+    DB-->>Server: Audit Log Stored
+    Server-->>Client: 201 Created { success: true, complaintId, complaint_number }
+    Client-->>UI: Response received
+    UI-->>Student: Displays success & redirects to Complaint Detail view
+    </div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart TD
+    Start([User Logs In]) --> CheckRole{User Role?}
+    
+    CheckRole -->|Student / Faculty| StuAction[Open New Complaint Form]
+    StuAction --> FillForm[Select Category, Location, Priority & Enter Description]
+    FillForm --> Submit[Submit Complaint -> Status: NEW]
+    Submit --> Track[View Status on Student Dashboard]
+
+    CheckRole -->|Administrator| AdminReview[Admin Reviews Complaints on Dashboard]
+    Track -.-> AdminReview
+    AdminReview --> ValidCheck{Is Complaint Valid?}
+    
+    ValidCheck -->|No| Reject[Admin Rejects -> Status: REJECTED]
+    Reject --> EndTerm([Process Completed])
+    
+    ValidCheck -->|Yes| Verify[Admin Verifies -> Status: VERIFIED]
+    Verify --> Assign[Admin Allocates Staff -> Status: ASSIGNED]
+
+    CheckRole -->|Maintenance Staff| StaffTasks[Staff Views Assigned Tasks]
+    Assign -.-> StaffTasks
+    StaffTasks --> AcceptTask[Staff Accepts -> Status: IN_PROGRESS]
+    AcceptTask --> Work[Perform Repair / Maintenance Work]
+    Work --> Resolve[Staff Adds Remarks -> Status: RESOLVED]
+
+    Resolve --> UserReview{Is Issue Satisfactorily Resolved?}
+    UserReview -->|Yes| Feedback[Student Submits Rating & Comments]
+    Feedback --> Close[Admin / User Closes -> Status: CLOSED]
+    Close --> EndTerm
+    
+    UserReview -->|No - Persists| Reopen[User Reopens -> Status: REOPENED]
+    Reopen --> Assign
+    </div>
+</body>
+</html>

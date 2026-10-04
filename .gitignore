@@ -59,3 +59,8 @@ ehthumbs.db
 # Misc
 *.zip
 *.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class

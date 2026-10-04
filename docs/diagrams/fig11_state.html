@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+stateDiagram-v2
+    [*] --> NEW : Student / Faculty submits complaint
+
+    NEW --> VERIFIED : Admin verifies genuineness
+    NEW --> REJECTED : Admin rejects (duplicate / out of scope)
+
+    VERIFIED --> ASSIGNED : Admin allocates to maintenance staff
+    VERIFIED --> REJECTED : Admin rejects upon technical review
+
+    ASSIGNED --> IN_PROGRESS : Maintenance staff accepts & begins repair
+
+    IN_PROGRESS --> RESOLVED : Maintenance staff completes repair & enters remarks
+
+    RESOLVED --> CLOSED : User or Admin confirms fix is satisfactory
+    RESOLVED --> REOPENED : User reports issue still persists
+
+    CLOSED --> REOPENED : Issue reoccurs after formal closure
+
+    REOPENED --> VERIFIED : Admin reviews reoccurrence
+    REOPENED --> ASSIGNED : Admin reassigns to maintenance staff
+
+    REJECTED --> [*]
+    CLOSED --> [*]
+    </div>
+</body>
+</html>

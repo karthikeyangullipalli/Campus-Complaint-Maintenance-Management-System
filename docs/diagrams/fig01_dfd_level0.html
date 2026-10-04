@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart LR
+    Student["Student / Faculty"]
+    Admin["Administrator"]
+    Staff["Maintenance Staff"]
+    CCMS(("0<br/><b>Campus Complaint &<br/>Maintenance Management<br/>System (CCMS)</b>"))
+
+    Student -->|"Complaint Details, Evidence Image,<br/>Feedback Rating, Credentials"| CCMS
+    CCMS -->|"Complaint Status, Reference ID,<br/>Resolution History"| Student
+
+    Admin -->|"Verification Decision, Staff Assignment,<br/>Category/Location Setup, Credentials"| CCMS
+    CCMS -->|"All Complaints, System Analytics,<br/>User Records, Status Logs"| Admin
+
+    Staff -->|"Work Progress Updates,<br/>Resolution Remarks, Credentials"| CCMS
+    CCMS -->|"Assigned Task Details,<br/>Location & Category Data"| Staff
+    </div>
+</body>
+</html>

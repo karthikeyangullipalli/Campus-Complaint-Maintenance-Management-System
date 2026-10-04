@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart TD
+    subgraph ClientNode["Client Device (Desktop / Laptop / Mobile Device)"]
+        Browser["Modern Web Browser<br/>(Google Chrome, Microsoft Edge, Mozilla Firefox)<br/>Runs React 18 SPA (HTML5, JS Bundle, Tailwind CSS)"]
+    end
+
+    subgraph WebServerNode["Application Server Node (Host / Cloud VM)"]
+        NodeServer["Node.js 18+ LTS Runtime"]
+        ExpressApp["Express.js 4 REST API (Port 5000)<br/>Routes, JWT Verification, Role Guards"]
+        LocalStorage["Local File Storage<br/>backend/uploads/ (Uploaded Complaint Evidence Images)"]
+        NodeServer --> ExpressApp
+        ExpressApp --> LocalStorage
+    end
+
+    subgraph DBServerNode["Database Server Node (Dedicated / Localhost)"]
+        MySQLServer["MySQL 8.0 Server (Port 3306)<br/>Relational Database Engine: ccms_db<br/>7 Tables with Foreign Keys & B-Tree Indexes"]
+    end
+
+    Browser -->|"HTTP / HTTPS (Port 5173 / Port 80)<br/>JSON Payloads with Bearer JWT"| ExpressApp
+    ExpressApp -->|"TCP Connection (Port 3306)<br/>Parameterized SQL Queries via MySQL2 Pool"| MySQLServer
+    </div>
+</body>
+</html>

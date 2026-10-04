@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart TD
+    subgraph ClientLayer["Presentation Layer (Client Tier - React 18 + Vite)"]
+        UI["Web Browser (Chrome / Edge / Firefox)"]
+        Components["React Components & Pages<br/>(StudentLayout, AdminLayout, MaintenanceLayout)"]
+        Axios["Axios HTTP Client with JWT Request Interceptor<br/>(Bearer Token Injection & Base URL /api)"]
+        UI --> Components --> Axios
+    end
+
+    subgraph ServerLayer["Application Layer (Server Tier - Node.js + Express 4)"]
+        Middleware["Express Middleware<br/>(CORS, JSON Parser, verifyToken, requireRole, Multer)"]
+        Routes["RESTful API Route Controllers<br/>(auth, complaints, assignments, dashboard, users, categories, locations)"]
+        Service["Business Logic & State Validation<br/>(VALID_TRANSITIONS FSM, bcryptjs, Password Sanitization)"]
+        Axios -->|"HTTPS / JSON REST Calls"| Middleware
+        Middleware --> Routes --> Service
+    end
+
+    subgraph DataLayer["Data Layer (Storage Tier - MySQL 8 Relational Database)"]
+        Pool["MySQL2 Connection Pool<br/>(Promise-based, Parameterized Queries)"]
+        Tables["Relational Tables (InnoDB, UTF8mb4)<br/>users | complaints | complaint_categories | locations<br/>complaint_assignments | complaint_updates | feedback"]
+        Service --> Pool --> Tables
+    end
+    </div>
+</body>
+</html>

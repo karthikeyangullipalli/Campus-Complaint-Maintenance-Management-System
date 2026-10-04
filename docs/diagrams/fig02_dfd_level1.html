@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { curve: 'linear' },
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 14
+        });
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 30px;
+            display: inline-block;
+        }
+        .mermaid {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+flowchart TD
+    User["Student / Faculty"]
+    Admin["Administrator"]
+    Staff["Maintenance Staff"]
+
+    P1(("1.0<br/>Authentication &<br/>Access Control"))
+    P2(("2.0<br/>Complaint Registration<br/>& Lodging"))
+    P3(("3.0<br/>Verification &<br/>Review"))
+    P4(("4.0<br/>Maintenance Task<br/>Assignment"))
+    P5(("5.0<br/>Work Execution &<br/>Status Update"))
+    P6(("6.0<br/>Closure &<br/>Feedback"))
+    P7(("7.0<br/>Dashboard &<br/>System Admin"))
+
+    D1[("D1: Users DB")]
+    D2[("D2: Complaints DB")]
+    D3[("D3: Categories & Locations DB")]
+    D4[("D4: Complaint Updates / Audit Log")]
+    D5[("D5: Feedback DB")]
+
+    User -->|"Login / Register"| P1
+    Admin -->|"Login Credentials"| P1
+    Staff -->|"Login Credentials"| P1
+    P1 <-->|"Verify & Read/Write"| D1
+    P1 -->|"JWT Token"| User
+    P1 -->|"JWT Token"| Admin
+    P1 -->|"JWT Token"| Staff
+
+    User -->|"Complaint Form & Image"| P2
+    P2 <-->|"Fetch Active Cat & Loc"| D3
+    P2 -->|"Save Complaint (NEW)"| D2
+    P2 -->|"Initial Status Log"| D4
+    P2 -->|"Complaint Reference ID"| User
+
+    Admin -->|"Verify / Reject Decision"| P3
+    P3 <-->|"Read & Update Status"| D2
+    P3 -->|"Log Status Change"| D4
+
+    Admin -->|"Assign Staff ID & Notes"| P4
+    P4 <-->|"Update Status (ASSIGNED)"| D2
+    P4 -->|"Create Assignment Record"| D4
+    P4 -->|"Task Details"| Staff
+
+    Staff -->|"Accept & Mark RESOLVED"| P5
+    P5 <-->|"Update Status (IN_PROGRESS/RESOLVED)"| D2
+    P5 -->|"Log Remarks & Timestamps"| D4
+
+    User -->|"Rating & Comments"| P6
+    Admin -->|"Confirm Closure"| P6
+    P6 -->|"Store Rating"| D5
+    P6 <-->|"Update Status (CLOSED/REOPENED)"| D2
+    P6 -->|"Log Closure/Reopen"| D4
+
+    Admin -->|"Query System Stats"| P7
+    P7 <-->|"Aggregate Metrics"| D1
+    P7 <-->|"Aggregate Metrics"| D2
+    P7 <-->|"Read Audit"| D4
+    P7 -->|"Dashboard Overview"| Admin
+    </div>
+</body>
+</html>
